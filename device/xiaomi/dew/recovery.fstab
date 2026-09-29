@@ -1,0 +1,8 @@
+/dev/block/mapper/system    /system    erofs    ro
+/dev/block/mapper/vendor    /vendor    erofs    ro
+/dev/block/mapper/product   /product   erofs    ro
+
+/dev/block/by-name/metadata /metadata  f2fs     rw
+/dev/block/by-name/userdata /data      f2fs     rw
+
+/dev/block/mapper/system_ext /system_ext erofs   ro
