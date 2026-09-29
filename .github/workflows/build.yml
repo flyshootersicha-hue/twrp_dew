@@ -17,8 +17,11 @@ jobs:
           echo "=== Repository device tree ==="
           find device/xiaomi/dew -maxdepth 2 -type f -print
 
-          echo "=== Check device.mk ==="
+          echo "=== Check required files ==="
+          test -f device/xiaomi/dew/AndroidProducts.mk
+          test -f device/xiaomi/dew/BoardConfig.mk
           test -f device/xiaomi/dew/device.mk
+          test -f device/xiaomi/dew/twrp_dew.mk
 
       - name: Install dependencies
         run: |
@@ -26,6 +29,7 @@ jobs:
           sudo apt install -y \
             git \
             curl \
+            wget \
             zip \
             unzip \
             bc \
@@ -42,50 +46,35 @@ jobs:
             lz4 \
             zstd
 
-      - name: Download prebuilt kernel
-        run: |
-          mkdir -p device/xiaomi/dew/prebuilt
-
-          wget -O device/xiaomi/dew/prebuilt/kernel \
-            "https://github.com/flyshootersicha-hue/twrp_dew/releases/download/kernel/kernel"
-
-          chmod 644 device/xiaomi/dew/prebuilt/kernel
-
-          echo "=== Kernel ==="
-          ls -lh device/xiaomi/dew/prebuilt/kernel
-
-      - name: Verify kernel
-        run: |
-          test -s device/xiaomi/dew/prebuilt/kernel
-
-          file device/xiaomi/dew/prebuilt/kernel
-
       - name: Install repo
         run: |
-          mkdir -p ~/bin
-          curl -L https://storage.googleapis.com/git-repo-downloads/repo \
-            -o ~/bin/repo
-          chmod +x ~/bin/repo
+          mkdir -p "$HOME/bin"
+
+          curl -L \
+            https://storage.googleapis.com/git-repo-downloads/repo \
+            -o "$HOME/bin/repo"
+
+          chmod +x "$HOME/bin/repo"
+
           echo "$HOME/bin" >> "$GITHUB_PATH"
 
-      - name: Cache TWRP source
-        uses: actions/cache@v4
-        with:
-          path: twrp
-          key: twrp-12.1-${{ runner.os }}
-
-      - name: Sync TWRP source
+      - name: Sync clean TWRP 12.1
         run: |
-           mkdir -p twrp
-           cd twrp
+          rm -rf twrp
+          mkdir -p twrp
+          cd twrp
 
-           if [ ! -d ".repo" ]; then
-             repo init \
-               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-               -b twrp-12.1
-            fi
+          repo init --depth=1 \
+            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+            -b twrp-12.1
 
-           repo sync -j2 --force-sync
+          repo sync -c \
+            --no-clone-bundle \
+            --no-tags \
+            --optimized-fetch \
+            --prune \
+            --force-sync \
+            -j"$(nproc)"
 
       - name: Copy device tree
         run: |
@@ -98,21 +87,89 @@ jobs:
           echo "=== Check copied device.mk ==="
           test -f twrp/device/xiaomi/dew/device.mk
 
-      -  name: Debug recovery configuration
-         run: |
-            echo "=== BoardConfig ==="
-            grep -nE "RECOVERY|VENDOR_BOOT|RAMDISK|KERNEL" \
+      - name: Download prebuilt kernel
+        run: |
+          mkdir -p twrp/device/xiaomi/dew/prebuilt
+
+          wget -O twrp/device/xiaomi/dew/prebuilt/kernel \
+            "https://github.com/flyshootersicha-hue/twrp_dew/releases/download/kernel/kernel"
+
+          chmod 644 twrp/device/xiaomi/dew/prebuilt/kernel
+
+          echo "=== Kernel ==="
+          ls -lh twrp/device/xiaomi/dew/prebuilt/kernel
+
+          echo "=== Kernel file ==="
+          file twrp/device/xiaomi/dew/prebuilt/kernel
+
+          test -s twrp/device/xiaomi/dew/prebuilt/kernel
+
+      - name: Debug recovery configuration
+        run: |
+          cd twrp
+
+          echo "=== BoardConfig ==="
+          grep -nE \
+            "RECOVERY|VENDOR_BOOT|RAMDISK|KERNEL" \
             device/xiaomi/dew/BoardConfig.mk || true
 
-            echo "=== TWRP config ==="
-            grep -R "TARGET_NO_RECOVERY\|BOARD_MOVE_RECOVERY" \
-            device/xiaomi/dew vendor/twrp/build 2>/dev/null | head -100 || true
-          
+          echo
+          echo "=== Recovery variables in device tree ==="
+          grep -R \
+            "TARGET_NO_RECOVERY\|TW_HAS_NO_RECOVERY_PARTITION\|BOARD_MOVE_RECOVERY\|BOARD_INCLUDE_RECOVERY" \
+            device/xiaomi/dew \
+            2>/dev/null || true
+
+      - name: Clean build output
+        run: |
+          cd twrp
+          rm -rf out
 
       - name: Build TWRP
         run: |
-          export RECOVERY_VARIANT=twrp
           cd twrp
+
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export RECOVERY_VARIANT=twrp
+
           source build/envsetup.sh
+
           lunch twrp_dew-eng
-          mka recoveryimage
+
+          echo "=== Resolved variables ==="
+          echo "TARGET_NO_RECOVERY:"
+          get_build_var TARGET_NO_RECOVERY || true
+
+          echo "TW_HAS_NO_RECOVERY_PARTITION:"
+          get_build_var TW_HAS_NO_RECOVERY_PARTITION || true
+
+          echo "BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT:"
+          get_build_var BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT || true
+
+          echo "TARGET_PREBUILT_KERNEL:"
+          get_build_var TARGET_PREBUILT_KERNEL || true
+
+          echo "PRODUCT_OUT:"
+          get_build_var PRODUCT_OUT
+
+          echo "=== Build vendor_boot ==="
+          mka -j"$(nproc)" vendorbootimage
+
+      - name: Check build output
+        run: |
+          cd twrp
+
+          echo "=== Output files ==="
+          find out/target/product/dew \
+            -maxdepth 2 \
+            -type f \
+            \( \
+              -name "vendor_boot.img" \
+              -o -name "boot.img" \
+              -o -name "recovery.img" \
+            \) \
+            -print || true
+
+          echo
+          echo "=== Product directory ==="
+          ls -lah out/target/product/dew || true
