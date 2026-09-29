@@ -87,6 +87,26 @@ jobs:
 
            repo sync -j2 --force-sync
 
+      - name: Remove unnecessary VTS test sources
+        run: |
+          cd twrp
+
+          echo "=== Removing unnecessary VTS/CTS test sources ==="
+
+          rm -rf test/vts
+          rm -rf test/vts-core
+          rm -rf test/vts-testcase
+          rm -rf test/vts_test_framework
+          rm -rf test/vts_test_binary
+          rm -rf test/vts_testcases
+
+          echo "=== Check remaining VTS references ==="
+          grep -R \
+            "vts_proto_fuzzer_default" \
+            --include="Android.bp" \
+            . \
+            2>/dev/null | head -50 || true
+
       - name: Copy device tree
         run: |
           mkdir -p twrp/device/xiaomi
