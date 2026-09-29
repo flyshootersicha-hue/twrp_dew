@@ -42,6 +42,15 @@ jobs:
             lz4 \
             zstd
 
+      - name: Download stock kernel
+        run: |
+          mkdir -p device/xiaomi/dew/prebuilt
+
+          wget -O device/xiaomi/dew/prebuilt/stock_boot.img \
+            "https://github.com/flyshootersicha-hue/twrp_dew/releases/download/kernel/kernel"
+
+          ls -lh device/xiaomi/dew/prebuilt/kernel
+
       - name: Install repo
         run: |
           mkdir -p ~/bin
