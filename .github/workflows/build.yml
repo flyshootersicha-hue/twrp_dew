@@ -1,4 +1,5 @@
 
+
 name: Build TWRP dew
 
 on:
@@ -123,12 +124,22 @@ jobs:
       - name: Clean build output
         run: |
           cd twrp
+
           rm -rf out
+
+          export OUT_DIR=out
+
+          mkdir -p out/target/product/dew/root
+          mkdir -p out/target/product/dew/recovery/root
+
+          echo "=== Prepared output directories ==="
+          find out/target/product/dew -maxdepth 2 -type d -print
 
       - name: Build TWRP
         run: |
           cd twrp
 
+          export OUT_DIR=out
           export ALLOW_MISSING_DEPENDENCIES=true
           export RECOVERY_VARIANT=twrp
 
@@ -137,6 +148,7 @@ jobs:
           lunch twrp_dew-eng
 
           echo "=== Resolved variables ==="
+
           echo "TARGET_NO_RECOVERY:"
           get_build_var TARGET_NO_RECOVERY || true
 
@@ -149,17 +161,64 @@ jobs:
           echo "TARGET_PREBUILT_KERNEL:"
           get_build_var TARGET_PREBUILT_KERNEL || true
 
+          echo "OUT_DIR:"
+          get_build_var OUT_DIR || true
+
           echo "PRODUCT_OUT:"
           get_build_var PRODUCT_OUT
+
+          echo "=== Ensure output directories ==="
+          mkdir -p "$ANDROID_PRODUCT_OUT/root"
+          mkdir -p "$ANDROID_PRODUCT_OUT/recovery/root"
 
           echo "=== Build vendor_boot ==="
           mka -j"$(nproc)" vendorbootimage
 
-      - name: Check build output
+      - name: Collect output
+        if: always()
         run: |
           cd twrp
 
-          echo "=== Output files ==="
+          mkdir -p output
+
+          echo "=== Searching build outputs ==="
+
+          if [ -f out/target/product/dew/vendor_boot.img ]; then
+            cp -f \
+              out/target/product/dew/vendor_boot.img \
+              output/vendor_boot.img
+          fi
+
+          if [ -f out/target/product/dew/boot.img ]; then
+            cp -f \
+              out/target/product/dew/boot.img \
+              output/boot.img
+          fi
+
+          if [ -f out/target/product/dew/recovery.img ]; then
+            cp -f \
+              out/target/product/dew/recovery.img \
+              output/recovery.img
+          fi
+
+          echo
+          echo "=== Final output ==="
+          ls -lh output || true
+
+      - name: Upload TWRP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twrp-dew
+          path: twrp/output/
+          if-no-files-found: warn
+
+      - name: Check build output
+        if: always()
+        run: |
+          cd twrp
+
+          echo "=== Product output ==="
           find out/target/product/dew \
             -maxdepth 2 \
             -type f \
