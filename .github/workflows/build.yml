@@ -96,10 +96,22 @@ jobs:
            mkdir -p twrp/device/xiaomi
            cp -a device/xiaomi/dew twrp/device/xiaomi/dew
 
+      - name: Debug recovery configuration
+        run: |
+           echo "=== BoardConfig ==="
+            grep -nE "RECOVERY|VENDOR_BOOT|RAMDISK|KERNEL" \
+           device/xiaomi/dew/BoardConfig.mk || true
+
+           echo "=== TWRP config ==="
+           grep -R "TARGET_NO_RECOVERY\|BOARD_MOVE_RECOVERY" \
+            device/xiaomi/dew vendor/twrp/build 2>/dev/null | head -100 || true
+
       - name: Build TWRP
         run: |
           cd twrp
           export ALLOW_MISSING_DEPENDENCIES=true
+          export RECOVERY_VARIANT=twrp
+          
           source build/envsetup.sh
           lunch twrp_dew-eng
           mka -j$(nproc) vendorbootimage
