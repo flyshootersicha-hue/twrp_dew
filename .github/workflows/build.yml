@@ -83,17 +83,27 @@ jobs:
       # ==========================================
       # 5. Sync TWRP source
       # ==========================================
+      - name: Restore TWRP source cache
+        uses: actions/cache@v4
+        with:
+           path: twrp
+           key: twrp-12.1-ubuntu-24.04-v1
+
       - name: Sync TWRP source
         run: |
+          if [ ! -d "twrp/.repo" ]; then
           mkdir -p twrp
           cd twrp
 
           repo init \
-            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-            -b twrp-12.1
+              -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+              -b twrp-12.1
 
           repo sync -j2 --force-sync
-
+          else
+          echo "TWRP source restored from cache."
+          echo "Skipping repo sync."
+          fi
       # ==========================================
       # 6. Copy device tree AFTER TWRP sync
       # ==========================================
