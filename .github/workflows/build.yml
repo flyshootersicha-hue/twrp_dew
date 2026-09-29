@@ -135,6 +135,15 @@ jobs:
           echo "=== Prepared output directories ==="
           find out/target/product/dew -maxdepth 2 -type d -print
 
+      - name: Prepare recovery fstab
+        run: |
+          cp device/xiaomi/dew/prebuilt/fstab.mt6768 \
+             device/xiaomi/dew/recovery.fstab
+
+          echo "=== recovery.fstab ==="
+          ls -lh device/xiaomi/dew/recovery.fstab
+          head -n 30 device/xiaomi/dew/recovery.fstab
+
       - name: Build TWRP
         run: |
           cd twrp
