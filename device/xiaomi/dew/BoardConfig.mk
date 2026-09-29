@@ -1,3 +1,4 @@
+
 LOCAL_PATH := device/xiaomi/dew
 
 DEVICE_PATH := $(LOCAL_PATH)
@@ -49,7 +50,7 @@ BOARD_SUPER_PARTITION_SIZE := 9663676416
 # Metadata
 BOARD_USES_METADATA_PARTITION := true
 
-# Recovery is integrated into vendor_boot
+# Recovery
 TARGET_NO_RECOVERY := true
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
