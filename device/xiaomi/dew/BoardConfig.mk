@@ -1,4 +1,3 @@
-```makefile
 LOCAL_PATH := device/xiaomi/dew
 
 DEVICE_PATH := $(LOCAL_PATH)
@@ -110,5 +109,4 @@ TW_INCLUDE_FASTBOOTD := true
 TW_INCLUDE_CRYPTO := true
 TWRP_INCLUDE_LOGCAT := true
 TW_INCLUDE_NTFS_3G := true
-```
 
