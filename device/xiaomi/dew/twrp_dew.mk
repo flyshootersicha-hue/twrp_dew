@@ -6,7 +6,4 @@ PRODUCT_BRAND := Xiaomi
 PRODUCT_MODEL := Redmi 15C
 PRODUCT_MANUFACTURER := Xiaomi
 
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.product.device=dew \
-    ro.product.name=twrp_dew \
-    ro.product.model="Redmi 15C"
+$(call inherit-product, $(LOCAL_PATH)/device.mk)
