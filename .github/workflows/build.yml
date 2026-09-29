@@ -80,6 +80,23 @@ jobs:
           echo "=== Check copied device.mk ==="
           test -f twrp/device/xiaomi/dew/device.mk
 
+      - name: Verify device tree
+        run: |
+          echo "=== Device tree ==="
+          find twrp/device/xiaomi/dew -maxdepth 3 -type f | sort
+
+          echo "=== Required files ==="
+          test -f twrp/device/xiaomi/dew/AndroidProducts.mk
+          test -f twrp/device/xiaomi/dew/BoardConfig.mk
+          test -f twrp/device/xiaomi/dew/device.mk
+          test -f twrp/device/xiaomi/dew/twrp_dew.mk
+
+          echo "=== BoardConfig ==="
+          grep -n "PRODUCT_USE_DYNAMIC_PARTITIONS" twrp/device/xiaomi/dew/BoardConfig.mk || true
+
+          echo "=== device.mk ==="
+          grep -n "PRODUCT_USE_DYNAMIC_PARTITIONS" twrp/device/xiaomi/dew/device.mk || true
+
       - name: Build TWRP
         run: |
           cd twrp
