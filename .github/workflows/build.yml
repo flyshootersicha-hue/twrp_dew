@@ -1,4 +1,3 @@
-
 name: Build TWRP dew
 
 on:
@@ -9,16 +8,9 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout device tree
+
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Check device tree
-        run: |
-          echo "=== Repository device tree ==="
-          find device/xiaomi/dew -maxdepth 2 -type f -print
-
-          echo "=== Check device.mk ==="
-          test -f device/xiaomi/dew/device.mk
 
       - name: Install dependencies
         run: |
@@ -42,47 +34,38 @@ jobs:
             lz4 \
             zstd
 
-      - name: Install repo
+      - name: Verify device tree
         run: |
-          mkdir -p ~/bin
-          curl -L https://storage.googleapis.com/git-repo-downloads/repo \
-            -o ~/bin/repo
-          chmod +x ~/bin/repo
-          echo "$HOME/bin" >> "$GITHUB_PATH"
+          test -f device/xiaomi/dew/AndroidProducts.mk
+          test -f device/xiaomi/dew/BoardConfig.mk
+          test -f device/xiaomi/dew/device.mk
+          test -f device/xiaomi/dew/twrp_dew.mk
 
-      - name: Cache TWRP source
+          echo "Device tree OK"
+
+      - name: Configure ccache
+        run: |
+          mkdir -p ~/.ccache
+          ccache --max-size=10G
+          ccache --set-config=compression=true
+
+      - name: Restore ccache
         uses: actions/cache@v4
         with:
-          path: twrp
-          key: twrp-12.1-${{ runner.os }}
-
-      - name: Sync TWRP source
-        run: |
-           mkdir -p twrp
-           cd twrp
-
-           if [ ! -d ".repo" ]; then
-             repo init \
-               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-               -b twrp-12.1
-            fi
-
-           repo sync -j2 --force-sync
-
-      - name: Copy device tree
-        run: |
-          mkdir -p twrp/device/xiaomi
-          cp -a device/xiaomi/dew twrp/device/xiaomi/
-
-          echo "=== TWRP device tree ==="
-          find twrp/device/xiaomi/dew -maxdepth 2 -type f -print
-
-          echo "=== Check copied device.mk ==="
-          test -f twrp/device/xiaomi/dew/device.mk
+          path: ~/.ccache
+          key: twrp-ccache-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            twrp-ccache-${{ runner.os }}-
 
       - name: Build TWRP
         run: |
-          cd twrp
           source build/envsetup.sh
           lunch twrp_dew-eng
-          mka recoveryimage
+          mka -j$(nproc) recoveryimage
+
+      - name: Upload TWRP
+        uses: actions/upload-artifact@v4
+        with:
+          name: twrp-dew
+          path: |
+            out/target/product/dew/*.img
