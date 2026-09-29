@@ -115,4 +115,18 @@ jobs:
           cd twrp
           source build/envsetup.sh
           lunch twrp_dew-eng
+
+          echo "=== Prepare recovery directories ==="
+          mkdir -p "$ANDROID_PRODUCT_OUT/root"
+          mkdir -p "$ANDROID_PRODUCT_OUT/recovery/root/system/etc"
+          mkdir -p "$ANDROID_PRODUCT_OUT/recovery/root/sdcard"
+          mkdir -p "$ANDROID_PRODUCT_OUT/recovery/root/tmp"
+
+          echo "=== Recovery directories ==="
+          find "$ANDROID_PRODUCT_OUT/recovery/root" \
+            -maxdepth 3 -type d | sort
+
+          echo "=== Build vendor_boot ==="
+          mka -j"$(nproc)" vendorbootimage
+          
           mka recoveryimage
