@@ -34,7 +34,7 @@ AB_OTA_PARTITIONS := \
     vbmeta_system \
     vbmeta_vendor
 
-# Block size
+# Storage
 BOARD_FLASH_BLOCK_SIZE := 131072
 
 # Partition sizes
@@ -43,6 +43,7 @@ BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864
 BOARD_INIT_BOOTIMAGE_PARTITION_SIZE := 8388608
 BOARD_DTBOIMG_PARTITION_SIZE := 8388608
 
+# Super
 BOARD_SUPER_PARTITION_SIZE := 9663676416
 
 # Dynamic partitions
@@ -51,7 +52,7 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 # Metadata
 BOARD_USES_METADATA_PARTITION := true
 
-# Recovery is inside vendor_boot
+# Recovery is integrated into vendor_boot
 TARGET_NO_RECOVERY := true
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
