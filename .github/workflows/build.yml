@@ -50,16 +50,24 @@ jobs:
           chmod +x ~/bin/repo
           echo "$HOME/bin" >> "$GITHUB_PATH"
 
+      - name: Cache TWRP source
+        uses: actions/cache@v4
+        with:
+          path: twrp
+          key: twrp-12.1-${{ runner.os }}
+
       - name: Sync TWRP source
         run: |
-          mkdir -p twrp
-          cd twrp
+           mkdir -p twrp
+           cd twrp
 
-          repo init \
-            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-            -b twrp-12.1
+           if [ ! -d ".repo" ]; then
+             repo init \
+               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+               -b twrp-12.1
+            fi
 
-          repo sync -j2 --force-sync
+           repo sync -j2 --force-sync
 
       - name: Copy device tree
         run: |
