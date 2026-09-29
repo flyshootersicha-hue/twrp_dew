@@ -95,6 +95,11 @@ TARGET_NO_RECOVERY := true
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true
 # BOARD_INCLUDE_RECOVERY_RAMDISK_IN_VENDOR_BOOT := true
 
+# 关闭单独root镜像，适配不生成root目录的平台
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
+# 如果是A11+ 动态分区设备，很多机型需要这个
+BOARD_USES_RECOVERY_AS_BOOT := true
+
 # ==========================================
 # Filesystems
 # ==========================================
