@@ -1,3 +1,4 @@
+
 name: Build TWRP dew
 
 on:
@@ -8,7 +9,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Checkout
+      - name: Checkout device tree
         uses: actions/checkout@v4
 
       - name: Install dependencies
@@ -27,17 +28,21 @@ jobs:
             libncurses5-dev \
             ccache \
             python3 \
-            python3-pip
+            python3-pip \
+            libxml2-utils \
+            xsltproc \
+            lz4 \
+            zstd
 
-      - name: Prepare Android build
+      - name: Install repo
         run: |
           mkdir -p ~/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo \
+          curl -L https://storage.googleapis.com/git-repo-downloads/repo \
             -o ~/bin/repo
-          chmod a+x ~/bin/repo
-          echo "$HOME/bin" >> $GITHUB_PATH
+          chmod +x ~/bin/repo
+          echo "$HOME/bin" >> "$GITHUB_PATH"
 
-      - name: Download TWRP source
+      - name: Sync TWRP source
         run: |
           mkdir -p twrp
           cd twrp
@@ -53,15 +58,9 @@ jobs:
           mkdir -p twrp/device/xiaomi
           cp -r device/xiaomi/dew twrp/device/xiaomi/
 
-      - name: Build
+      - name: Build TWRP
         run: |
           cd twrp
           source build/envsetup.sh
           lunch twrp_dew-eng
           mka recoveryimage
-
-      - name: Upload recovery
-        uses: actions/upload-artifact@v4
-        with:
-          name: twrp-dew
-          path: twrp/out/target/product/dew/recovery.img
