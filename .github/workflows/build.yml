@@ -56,33 +56,32 @@ jobs:
           path: twrp
           key: twrp-12.1-${{ runner.os }}
 
-      - name: Sync TWRP source
+      - name: Sync clean TWRP 12.1
         run: |
            mkdir -p twrp
            cd twrp
 
-           if [ ! -d ".repo" ]; then
-             repo init \
-               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-               -b twrp-12.1
-            fi
+            repo init --depth=1 \
+                  -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+                  -b twrp-12.1
 
-           repo sync -j2 --force-sync
+            repo sync -c \
+                --no-clone-bundle \
+                --no-tags \
+                --optimized-fetch \
+                --prune \
+                --force-sync \
+                -j$(nproc)
 
-      - name: Copy device tree
+      - name: Copy dew device tree
         run: |
-          mkdir -p twrp/device/xiaomi
-          cp -a device/xiaomi/dew twrp/device/xiaomi/
-
-          echo "=== TWRP device tree ==="
-          find twrp/device/xiaomi/dew -maxdepth 2 -type f -print
-
-          echo "=== Check copied device.mk ==="
-          test -f twrp/device/xiaomi/dew/device.mk
+           mkdir -p twrp/device/xiaomi
+           cp -a device/xiaomi/dew twrp/device/xiaomi/dew
 
       - name: Build TWRP
         run: |
           cd twrp
+          export ALLOW_MISSING_DEPENDENCIES=true
           source build/envsetup.sh
           lunch twrp_dew-eng
-          mka recoveryimage
+          mka -j$(nproc) vendorbootimage
