@@ -1,0 +1,34 @@
+LOCAL_PATH := device/xiaomi/dew
+
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_VARIANT := generic
+
+# Platform
+TARGET_BOARD_PLATFORM := mt6768
+
+# Boot header
+BOARD_BOOT_HEADER_VERSION := 4
+BOARD_KERNEL_PAGESIZE := 4096
+
+# Vendor boot
+BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 0x04000000
+BOARD_RAMDISK_USE_LZ4 := true
+
+# A/B
+AB_OTA_UPDATER := true
+BOARD_USES_RECOVERY_AS_BOOT := false
+
+# TWRP
+TW_THEME := portrait_hdpi
+TW_INCLUDE_FASTBOOTD := true
+
+# Storage
+TW_INCLUDE_NTFS_3G := true
+
+# Crypto
+TW_INCLUDE_CRYPTO := true
+
+# Debug
+TWRP_INCLUDE_LOGCAT := true
