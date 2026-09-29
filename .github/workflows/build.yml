@@ -12,6 +12,14 @@ jobs:
       - name: Checkout device tree
         uses: actions/checkout@v4
 
+      - name: Check device tree
+        run: |
+          echo "=== Repository device tree ==="
+          find device/xiaomi/dew -maxdepth 2 -type f -print
+
+          echo "=== Check device.mk ==="
+          test -f device/xiaomi/dew/device.mk
+
       - name: Install dependencies
         run: |
           sudo apt update
@@ -52,14 +60,6 @@ jobs:
             -b twrp-12.1
 
           repo sync -j2 --force-sync
-
-      - name: Check device tree
-        run: |
-          echo "=== Repository device tree ==="
-          find device/xiaomi/dew -maxdepth 2 -type f -print
-
-          echo "=== Check device.mk ==="
-          test -f device/xiaomi/dew/device.mk
 
       - name: Copy device tree
         run: |
