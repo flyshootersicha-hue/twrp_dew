@@ -86,6 +86,24 @@ jobs:
             fi
 
            repo sync -j2 --force-sync
+           
+      - name: Sync TWRP Sources
+        run: |
+           git config --global user.name "TWRP Builder"
+           git config --global user.email "builder@twrp.me"
+           git config --global color.ui true
+
+           rm -rf /tmp/twrp
+           mkdir -p /tmp/twrp
+
+           git clone --depth=1 \
+           --branch twrp-12.1 \
+           https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+           /tmp/fox
+
+           echo "=== TWRP source ==="
+           ls -lah /tmp/twrp
+        
 
       - name: Remove unnecessary VTS test sources
         run: |
