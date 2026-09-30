@@ -1,0 +1,147 @@
+name: Build OrangeFox Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      MANIFEST_BRANCH:
+        description: 'TWRP Manifest Branch'
+        required: true
+        default: '12.1'
+        type: choice
+        options:
+          - '12.1'
+      BUILD_TARGET:
+        description: 'Build Target'
+        required: true
+        default: 'twrp_dew-eng'
+        type: choice
+        options:
+          - 'twrp_dew-eng'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Maximize Build Space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 2048
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
+
+      - name: Checkout Device Tree
+        uses: actions/checkout@v4
+
+      - name: Free Disk Space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/hostedtoolcache
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf /usr/lib/jvm
+          sudo docker image prune -a --force || true
+          sudo docker system prune -a --volumes --force || true
+          sudo apt-get clean
+          df -h
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git-core gnupg flex bison build-essential zip curl \
+            zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
+            lib32z1-dev libxml2-utils xsltproc unzip \
+            python3 python-is-python3 rsync bc gperf libssl-dev \
+            libncurses5-dev libncursesw5-dev \
+            lz4 cpio liblzma-dev optipng
+
+      - name: Install repo
+        run: |
+          mkdir -p ~/.local/bin
+          curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/.local/bin/repo
+          chmod +x ~/.local/bin/repo
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+      - name: Sync TWRP Sources
+        run: |
+           git config --global user.name "TWRP Builder"
+           git config --global user.email "builder@twrp.me"
+           git config --global color.ui true
+
+           rm -rf /tmp/twrp
+           mkdir -p /tmp/twrp
+
+           git clone --depth=1 \
+           --branch twrp-12.1 \
+           https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+           /tmp/twrp
+
+           echo "=== TWRP source ==="
+           ls -lah /tmp/twrp
+
+      - name: Download prebuilt kernel
+        run: |
+          mkdir -p device/xiaomi/dew/prebuilt
+
+          wget -O device/xiaomi/dew/prebuilt/kernel \
+            "https://github.com/flyshootersicha-hue/twrp_dew/releases/download/kernel/kernel"
+
+          chmod 644 device/xiaomi/dew/prebuilt/kernel
+
+          echo "=== Kernel ==="
+          ls -lh device/xiaomi/dew/prebuilt/kernel
+
+      - name: Copy device tree
+        run: |
+          mkdir -p twrp/device/xiaomi
+          cp -a device/xiaomi/dew twrp/device/xiaomi/
+
+          echo "=== TWRP device tree ==="
+          find twrp/device/xiaomi/dew -maxdepth 2 -type f -print
+
+          echo "=== Check copied device.mk ==="
+          test -f twrp/device/xiaomi/dew/device.mk
+
+      - name: Build TWRP
+        run: |
+          cd /tmp/twrp
+          set +e
+          source build/envsetup.sh
+          set -e
+          echo "=== Lunching target: ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }} ==="
+          lunch ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }}
+          echo "=== Building vendorbootimage ==="
+          mka vendorbootimage
+
+      - name: Show Build Output
+        if: always()
+        run: |
+          find /tmp/twrp/out/target/product/dew -maxdepth 2 -type f || true
+
+      - name: Fix Permissions
+        if: always()
+        run: |
+          sudo chown -R runner:runner /tmp/twrp/out || true
+          sudo chmod -R a+rX /tmp/twrp/out || true
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OrangeFox-dew
+          if-no-files-found: warn
+          path: |
+            /tmp/fox/out/target/product/dew/twrp*.zip
+            /tmp/fox/out/target/product/dew/twrp*.img
+            /tmp/fox/out/target/product/dew/vendor_boot.img
+            /tmp/fox/out/target/product/dew/vendorboot.img
+            /tmp/fox/out/target/product/dew/vendor_ramdisk_recovery.cpio
+            /tmp/fox/out/target/product/dew/recovery.img
+            /tmp/fox/out/target/product/dew/boot.img
