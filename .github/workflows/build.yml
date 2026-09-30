@@ -77,19 +77,6 @@ jobs:
           curl -L https://storage.googleapis.com/git-repo-downloads/repo -o ~/.local/bin/repo
           chmod +x ~/.local/bin/repo
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-          
-      - name: Sync TWRP source
-        run: |
-           mkdir -p twrp
-           cd twrp
-
-           if [ ! -d ".repo" ]; then
-             repo init \
-               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-               -b twrp-12.1
-            fi
-
-           repo sync -j2 --force-sync
 
       - name: Download prebuilt kernel
         run: |
@@ -120,6 +107,17 @@ jobs:
             --prune \
             --force-sync \
             -j"$(nproc)"
+
+      - name: Build TWRP
+        run: |
+          cd twrp
+          set +e
+          source build/envsetup.sh
+          set -e
+          echo "=== Lunching target: ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }} ==="
+          lunch ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }}
+          echo "=== Building vendorbootimage ==="
+          mka vendorbootimage
 
       - name: Show Build Output
         if: always()
