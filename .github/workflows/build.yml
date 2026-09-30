@@ -62,8 +62,8 @@ jobs:
           echo "=== TWRP device tree ==="
           find /tmp/fox/device/xiaomi/dew/ -maxdepth 2 -type f -print
 
-#          echo "=== Check copied device.mk ==="
-#          test -f /tmp/fox/device/xiaomi/dew/device.mk
+          echo "=== Check copied device.mk ==="
+          test -f /tmp/fox/device/xiaomi/dew/device.mk
 
       - name: Install Dependencies
         run: |
