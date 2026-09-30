@@ -48,6 +48,17 @@ jobs:
 
           echo "=== Check device.mk ==="
           test -f device/xiaomi/dew/device.mk
+          
+      - name: Copy device tree
+        run: |
+          mkdir -p twrp/device/xiaomi
+          cp -a device/xiaomi/dew twrp/device/xiaomi/
+
+          echo "=== TWRP device tree ==="
+          find twrp/device/xiaomi/dew -maxdepth 2 -type f -print
+
+          echo "=== Check copied device.mk ==="
+          test -f twrp/device/xiaomi/dew/device.mk
 
       - name: Install Dependencies
         run: |
@@ -91,17 +102,6 @@ jobs:
 
           echo "=== Kernel ==="
           ls -lh device/xiaomi/dew/prebuilt/kernel
-
-      - name: Copy device tree
-        run: |
-          mkdir -p twrp/device/xiaomi
-          cp -a device/xiaomi/dew twrp/device/xiaomi/
-
-          echo "=== TWRP device tree ==="
-          find twrp/device/xiaomi/dew -maxdepth 2 -type f -print
-
-          echo "=== Check copied device.mk ==="
-          test -f twrp/device/xiaomi/dew/device.mk
 
       - name: Build TWRP
         run: |
