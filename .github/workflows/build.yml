@@ -97,7 +97,7 @@ jobs:
 
       - name: Build TWRP
         run: |
-          cd /tmp/twrp
+          cd twrp
           set +e
           source build/envsetup.sh
           set -e
@@ -109,13 +109,13 @@ jobs:
       - name: Show Build Output
         if: always()
         run: |
-          find /tmp/twrp/out/target/product/dew -maxdepth 2 -type f || true
+          find /twrp/out/target/product/dew -maxdepth 2 -type f || true
 
       - name: Fix Permissions
         if: always()
         run: |
-          sudo chown -R runner:runner /tmp/twrp/out || true
-          sudo chmod -R a+rX /tmp/twrp/out || true
+          sudo chown -R runner:runner /twrp/out || true
+          sudo chmod -R a+rX /twrp/out || true
 
       - name: Upload Artifacts
         if: always()
@@ -124,10 +124,10 @@ jobs:
           name: twrp-dew
           if-no-files-found: warn
           path: |
-            /tmp/fox/out/target/product/dew/twrp*.zip
-            /tmp/fox/out/target/product/dew/twrp*.img
-            /tmp/fox/out/target/product/dew/vendor_boot.img
-            /tmp/fox/out/target/product/dew/vendorboot.img
-            /tmp/fox/out/target/product/dew/vendor_ramdisk_recovery.cpio
-            /tmp/fox/out/target/product/dew/recovery.img
-            /tmp/fox/out/target/product/dew/boot.img
+            /tmp/twrp/out/target/product/dew/twrp*.zip
+            /tmp/rwrp/out/target/product/dew/twrp*.img
+            /tmp/twrp/out/target/product/dew/vendor_boot.img
+            /tmp/twrp/out/target/product/dew/vendorboot.img
+            /tmp/twrp/out/target/product/dew/vendor_ramdisk_recovery.cpio
+            /tmp/twrp/out/target/product/dew/recovery.img
+            /tmp/twrp/out/target/product/dew/boot.img
