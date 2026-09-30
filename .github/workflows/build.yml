@@ -73,19 +73,6 @@ jobs:
         with:
           path: twrp
           key: twrp-12.1-${{ runner.os }}
-
-      - name: Sync TWRP source
-        run: |
-           mkdir -p twrp
-           cd twrp
-
-           if [ ! -d ".repo" ]; then
-             repo init \
-               -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-               -b twrp-12.1
-            fi
-
-           repo sync -j2 --force-sync
            
       - name: Sync TWRP Sources
         run: |
