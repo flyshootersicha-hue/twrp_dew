@@ -52,7 +52,7 @@ jobs:
           find device/xiaomi/dew -maxdepth 2 -type f -print
 
           echo "=== Check device.mk ==="
-          test -f device/xiaomi/dew/device.mk
+          test -f /tmp/fox/device/xiaomi/dew/dew/device.mk
 
       - name: Copy device tree
         run: |
