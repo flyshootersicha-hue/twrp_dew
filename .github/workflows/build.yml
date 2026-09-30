@@ -132,10 +132,10 @@ jobs:
           name: twrp-dew
           if-no-files-found: warn
           path: |
-            /tmp/twrp/out/target/product/dew/twrp*.zip
-            /tmp/rwrp/out/target/product/dew/twrp*.img
-            /tmp/twrp/out/target/product/dew/vendor_boot.img
-            /tmp/twrp/out/target/product/dew/vendorboot.img
-            /tmp/twrp/out/target/product/dew/vendor_ramdisk_recovery.cpio
-            /tmp/twrp/out/target/product/dew/recovery.img
-            /tmp/twrp/out/target/product/dew/boot.img
+            /twrp/out/target/product/dew/twrp*.zip
+            /twrp/out/target/product/dew/twrp*.img
+            /twrp/out/target/product/dew/vendor_boot.img
+            /twrp/out/target/product/dew/vendorboot.img
+            /twrp/out/target/product/dew/vendor_ramdisk_recovery.cpio
+            /twrp/out/target/product/dew/recovery.img
+            /twrp/out/target/product/dew/boot.img
