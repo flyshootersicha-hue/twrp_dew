@@ -13,10 +13,10 @@ on:
       BUILD_TARGET:
         description: 'Build Target'
         required: true
-        default: 'twrp_dew-eng'
+        default: 'twrp_dew'
         type: choice
         options:
-          - 'twrp_dew-eng'
+          - 'twrp_dew'
 
 jobs:
   build:
@@ -114,8 +114,8 @@ jobs:
           set +e
           source build/envsetup.sh
           set -e
-          echo "=== Lunching target: ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }} ==="
-          lunch ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }}
+          echo "=== Lunching target: ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew' }} ==="
+          lunch ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew' }}
           echo "=== Building vendorbootimage ==="
           mka vendorbootimage
 
