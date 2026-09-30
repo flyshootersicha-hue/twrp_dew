@@ -99,7 +99,7 @@ jobs:
            git clone --depth=1 \
            --branch twrp-12.1 \
            https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
-           /tmp/fox
+           /tmp/twrp
 
            echo "=== TWRP source ==="
            ls -lah /tmp/twrp
