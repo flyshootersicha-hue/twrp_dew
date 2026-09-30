@@ -20,7 +20,7 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 
 # Device supports 64-bit applications
-TARGET_SUPPORTS_64_BIT_APPS := true
+# TARGET_SUPPORTS_64_BIT_APPS := true
 
 TARGET_PREBUILT_KERNEL := $(DEVICE_PATH)/prebuilt/kernel
 
