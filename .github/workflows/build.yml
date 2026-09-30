@@ -103,16 +103,23 @@ jobs:
           echo "=== Kernel ==="
           ls -lh device/xiaomi/dew/prebuilt/kernel
 
-      - name: Build TWRP
+      - name: Sync clean TWRP 12.1
         run: |
+          rm -rf twrp
+          mkdir -p twrp
           cd twrp
-          set +e
-          source build/envsetup.sh
-          set -e
-          echo "=== Lunching target: ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }} ==="
-          lunch ${{ github.event.inputs.BUILD_TARGET || 'twrp_dew-eng' }}
-          echo "=== Building vendorbootimage ==="
-          mka vendorbootimage
+
+          repo init --depth=1 \
+            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+            -b twrp-12.1
+
+          repo sync -c \
+            --no-clone-bundle \
+            --no-tags \
+            --optimized-fetch \
+            --prune \
+            --force-sync \
+            -j"$(nproc)"
 
       - name: Show Build Output
         if: always()
