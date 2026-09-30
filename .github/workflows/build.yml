@@ -84,13 +84,24 @@ jobs:
           cd sync
           ./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH || '14.1' }} --path /tmp/fox
 
-      - name: Copy Device Tree
+#      - name: Copy Device Tree
+#        run: |
+#          mkdir -p /tmp/fox/device/xiaomi/dew
+#          rsync -a \
+#            --exclude=.git \
+#            --exclude=.github \
+#            ./ /tmp/fox/device/xiaomi/dew/
+
+      - name: Copy device tree
         run: |
-          mkdir -p /tmp/fox/device/xiaomi/dew
-          rsync -a \
-            --exclude=.git \
-            --exclude=.github \
-            ./ /tmp/fox/device/xiaomi/dew/
+          mkdir -p /tmp/fox/device/xiaomi/dew/
+          cp -a device/xiaomi/dew /tmp/fox/device/xiaomi/dew/
+
+          echo "=== TWRP device tree ==="
+          find /tmp/fox/device/xiaomi/dew/ -maxdepth 2 -type f -print
+
+          echo "=== Check copied device.mk ==="
+          test -f /tmp/fox/device/xiaomi/dew/device.mk
 
       - name: Build OrangeFox Recovery
         run: |
